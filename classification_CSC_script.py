@@ -46,17 +46,15 @@ def get_args():
 
 def main():
     args = get_args()
-    print ('Got the arguments')
-    CSC_data = pd.read_csv(args.CSC_data_path)
-    y_train = pd.read_csv(args.y_file_path)
-    print ('Got the data')
-    CSC_data = CSC_data.iloc[:, 1:]
-    y_train = y_train.iloc[:, 2].values
+    print ('Got the arguments')    
+    X_path, y_path = args.CSC_data_path, args.y_file_path
     
-    class_weights = [4.8659e-05, 2.6752e-04] 
-    dim1, dim2, dim3, dim4 = 149321, 512, 128, 2
+    class_weights = [1.5, 5.6, 6.4]
+    len_dset = 83539
 
-    model = FeedforwardBin(dim1, dim2, dim3, dim4)
+    dim1, dim2, dim3, dim4 = 149321, 512, 128, 12
+
+    model = FeedforwardBin(dim1, dim2, dim3, dim4, args.batch_size)
     print ('Initialized the model')
 
     optimizer = torch.optim.SGD(model.parameters(), lr = args.lr)
@@ -67,8 +65,11 @@ def main():
     res_name = result_name(args.res_dir, args.num_epochs, args.model_class, dim1, dim2, dim3)
     print ('Beginning the training')
 
-    train_loss_, val_loss_= train(y_train, CSC_data, args.batch_size, args.num_iter, model, optimizer, criterion, args.num_epochs, scheduler, res_name, debug=False)
-    
+    train_loss_, val_loss_ = train(X_path, y_path, 
+                               len_dset, args.batch_size, 
+                               model, optimizer, 
+                              criterion, args.num_epochs, scheduler, 
+                            res_name, debug=False)
     
 if __name__ == '__main__':
      main()

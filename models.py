@@ -90,12 +90,13 @@ class MulticlassClassification(nn.Module):
     
         
 class FeedforwardBin(torch.nn.Module):
-    def __init__(self, input_size, hidden_size1, hidden_size2, hidden_size3):
+    def __init__(self, input_size, hidden_size1, hidden_size2, hidden_size3, batch_size):
         super(FeedforwardBin, self).__init__()
         self.input_size = input_size
         self.hidden_size1  = hidden_size1
         self.hidden_size2  = hidden_size2
         self.hidden_size3 = hidden_size3
+        self.batch_size = batch_size
         
         self.fc1 = torch.nn.Linear(self.input_size, self.hidden_size1)
         self.tahn1 = torch.nn.Tanh()
@@ -103,11 +104,11 @@ class FeedforwardBin(torch.nn.Module):
         self.tahn2 = torch.nn.Tanh()            
         self.fc3 = torch.nn.Linear(self.hidden_size2, self.hidden_size3)
         self.tahn3 = torch.nn.Tanh()            
-        self.fc4 = torch.nn.Linear(self.hidden_size3, 2)
+#         self.fc4 = torch.nn.Linear(self.hidden_size3, 2)
         self.batchnorm1 = nn.BatchNorm1d(self.hidden_size1)
         self.dropout1 = nn.Dropout(p=0.25)
         self.dropout2 = nn.Dropout(p=0.25)
-
+        self.softmax = nn.LogSoftmax(dim=2)
 
 
         torch.nn.init.xavier_uniform_(self.fc1.weight)
@@ -128,9 +129,12 @@ class FeedforwardBin(torch.nn.Module):
         tahn2 = self.tahn2(hidden2)
         tahn2 = self.dropout2(tahn2)        
         fc3 = self.fc3(tahn2)
+        fc3 = fc3.view(self.batch_size, 4, 3)
+
+        
 #         tahn3 = self.tahn3(fc3)
 #         output = self.fc4(tahn3)
 
-#         output = self.softmax(output)
+#         output = self.softmax(fc3)
         return fc3
 
